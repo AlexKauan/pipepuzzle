@@ -19,6 +19,14 @@
   "ResourceOrderSettings":[
     {"name":"ocontroller","order":1,"path":"objects/ocontroller/ocontroller.yy",},
     {"name":"opeca","order":2,"path":"objects/opeca/opeca.yy",},
+    {"name":"opeca2","order":3,"path":"objects/opeca2/opeca2.yy",},
+    {"name":"opeca3","order":4,"path":"objects/opeca3/opeca3.yy",},
+    {"name":"opeca4","order":5,"path":"objects/opeca4/opeca4.yy",},
     {"name":"sagua","order":1,"path":"sprites/sagua/sagua.yy",},
+    {"name":"Sprite3","order":2,"path":"sprites/Sprite3/Sprite3.yy",},
+    {"name":"Sprite4","order":16,"path":"sprites/Sprite4/Sprite4.yy",},
+    {"name":"Sprite5","order":3,"path":"sprites/Sprite5/Sprite5.yy",},
+    {"name":"Sprite6","order":4,"path":"sprites/Sprite6/Sprite6.yy",},
+    {"name":"Sprite7","order":5,"path":"sprites/Sprite7/Sprite7.yy",},
   ],
 }
