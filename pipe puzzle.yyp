@@ -39,6 +39,7 @@
   "name":"pipe puzzle",
   "resources":[
     {"id":{"name":"ocontroller","path":"objects/ocontroller/ocontroller.yy",},},
+    {"id":{"name":"oobstaculo","path":"objects/oobstaculo/oobstaculo.yy",},},
     {"id":{"name":"opeca","path":"objects/opeca/opeca.yy",},},
     {"id":{"name":"opeca2","path":"objects/opeca2/opeca2.yy",},},
     {"id":{"name":"opeca3","path":"objects/opeca3/opeca3.yy",},},
@@ -47,6 +48,7 @@
     {"id":{"name":"Room2","path":"rooms/Room2/Room2.yy",},},
     {"id":{"name":"sagua","path":"sprites/sagua/sagua.yy",},},
     {"id":{"name":"sdrag","path":"sprites/sdrag/sdrag.yy",},},
+    {"id":{"name":"sobstaculo","path":"sprites/sobstaculo/sobstaculo.yy",},},
     {"id":{"name":"Sprite3","path":"sprites/Sprite3/Sprite3.yy",},},
     {"id":{"name":"Sprite4","path":"sprites/Sprite4/Sprite4.yy",},},
     {"id":{"name":"Sprite5","path":"sprites/Sprite5/Sprite5.yy",},},

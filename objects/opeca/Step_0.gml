@@ -47,7 +47,7 @@ if (arrastando && mouse_check_button_released(mb_left)) {
             grid_x = clamp(grid_x, 0, gc.grid_width - 1);
             grid_y = clamp(grid_y, 0, gc.grid_height - 1);
 
-            // 🔹 Verifica se já existe peça
+            // 🔹 Verifica se a célula está disponível
             if (gc.grid[# grid_x, grid_y] == -1) {
                 // Célula vazia → posiciona a peça
                 gc.grid[# grid_x, grid_y] = id;
@@ -56,9 +56,14 @@ if (arrastando && mouse_check_button_released(mb_left)) {
                 x = gc.offset_x + grid_x * gc.cell_size + gc.cell_size/2;
                 y = gc.offset_y + grid_y * gc.cell_size + gc.cell_size/2;
             } else {
-                // Célula ocupada → volta para bancada
+                // Célula ocupada (por peça ou obstáculo) → volta para bancada
                 x = start_x;
                 y = start_y;
+                
+                // Feedback visual/sonoro opcional para obstáculo
+                if (gc.grid[# grid_x, grid_y] == -2) {
+                    show_debug_message("Não é possível colocar peça em obstáculo!");
+                }
             }
 
         } else {
