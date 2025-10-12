@@ -1,7 +1,10 @@
 {
   "$GMObject":"",
   "%Name":"oobstaculo",
-  "eventList":[],
+  "eventList":[
+    {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":0,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
+    {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":8,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
+  ],
   "managed":true,
   "name":"oobstaculo",
   "overriddenProperties":[],
@@ -27,10 +30,11 @@
   "resourceType":"GMObject",
   "resourceVersion":"2.0",
   "solid":false,
-  "spriteId":{
-    "name":"sobstaculo",
-    "path":"sprites/sobstaculo/sobstaculo.yy",
-  },
-  "spriteMaskId":null,
+  "spriteId":null,
   "visible":true,
 }
+
+
+
+
+

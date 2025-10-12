@@ -1,11 +1,11 @@
 {
   "$GMObject":"",
-  "%Name":"opeca3",
+  "%Name":"opeca6",
   "eventList":[
     {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":0,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
   ],
   "managed":true,
-  "name":"opeca3",
+  "name":"opeca6",
   "overriddenProperties":[],
   "parent":{
     "name":"Objetos",
@@ -33,9 +33,14 @@
   "resourceVersion":"2.0",
   "solid":false,
   "spriteId":{
-    "name":"Sprite6",
-    "path":"sprites/Sprite6/Sprite6.yy",
+    "name":"Sprite5",
+    "path":"sprites/Sprite5/Sprite5.yy",
   },
   "spriteMaskId":null,
   "visible":true,
 }
+
+
+
+
+

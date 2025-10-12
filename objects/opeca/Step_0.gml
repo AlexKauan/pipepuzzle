@@ -1,3 +1,4 @@
+// Botão esquerdo - arrastar peça
 if (mouse_check_button_pressed(mb_left) &&
     mouse_x > x-32 && mouse_x < x+32 &&
     mouse_y > y-32 && mouse_y < y+32) {
@@ -55,10 +56,23 @@ if (arrastando && mouse_check_button_released(mb_left)) {
                 // Centraliza na célula
                 x = gc.offset_x + grid_x * gc.cell_size + gc.cell_size/2;
                 y = gc.offset_y + grid_y * gc.cell_size + gc.cell_size/2;
+                
+                // Atualiza a posição inicial para esta nova posição
+                start_x = x;
+                start_y = y;
+                
+                // Valida o caminho após mover a peça
+                gc.verificar_caminho();
+                
+                // Efeito visual de movimento bem-sucedido
+                gc.criar_efeito_agua(x, y);
             } else {
-                // Célula ocupada (por peça ou obstáculo) → volta para bancada
+                // Célula ocupada (por peça ou obstáculo) → volta para última posição válida no grid
                 x = start_x;
                 y = start_y;
+                
+                // Efeito visual de erro
+                gc.criar_efeito_erro(x, y);
                 
                 // Feedback visual/sonoro opcional para obstáculo
                 if (gc.grid[# grid_x, grid_y] == -2) {
@@ -67,9 +81,12 @@ if (arrastando && mouse_check_button_released(mb_left)) {
             }
 
         } else {
-            // Fora da grade → volta para bancada
+            // Fora da grade → volta para última posição válida no grid
             x = start_x;
             y = start_y;
+            
+            // Efeito visual de erro
+            gc.criar_efeito_erro(x, y);
         }
 
     } else {
