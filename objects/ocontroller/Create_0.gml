@@ -38,6 +38,7 @@ total_pecas = 0;
 // Estado do jogo
 jogo_pausado = false;
 jogo_completo = false;
+game_over_ativo = false; // <-- ADICIONE ESTA LINHA
 mostrar_hint = false;
 
 // Configurações por nível

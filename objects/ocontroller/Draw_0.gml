@@ -50,7 +50,7 @@ draw_set_color(c_white);
 draw_set_font(-1);
 draw_text(10, 10, "Nível: " + string(nivel_atual));
 draw_text(10, 30, "Pontuação: " + string(pontuacao));
-var texto_dificuldade = "Fácil";
+var texto_dificuldade = "Facil";
 if (dificuldade == 2) texto_dificuldade = "Médio";
 if (dificuldade == 3) texto_dificuldade = "Difícil";
 draw_text(10, 50, "Dificuldade: " + texto_dificuldade);
@@ -74,7 +74,7 @@ draw_text(10, 90, "Dicas: " + string(hints_disponiveis));
 
 // Controles
 draw_set_color(c_white);
-draw_text(offset_x, status_y + 25, "Controles: Botão Esquerdo = Arrastar e Mover Peça");
+draw_text(offset_x, status_y + 25, "Controles: Botao Esquerdo = Arrastar e Mover Peça");
 draw_text(offset_x, status_y + 40, "Total de peças: " + string(total_pecas));
 draw_text(offset_x, status_y + 55, "H = Dica | R = Reiniciar | ESC = Pausar | N = Próximo nível (quando completo)");
 
@@ -113,3 +113,29 @@ if (jogo_completo) {
 draw_set_color(c_white);
 
 // Desenha todas as peças
+
+// ============================================
+// TELA DE GAME OVER
+// ============================================
+
+if (game_over_ativo) {
+    // Fundo escurecido
+    draw_set_color(c_black);
+    draw_set_alpha(0.7);
+    draw_rectangle(0, 0, display_get_gui_width(), display_get_gui_height(), false);
+    draw_set_alpha(1);
+    
+    // Texto principal (centralizado)
+    var centro_x = display_get_gui_width() / 2;
+    var centro_y = display_get_gui_height() / 2;
+    
+    draw_set_color(c_white);
+    draw_set_font(-1); // usa a fonte padrão, pode trocar por fnt_gameover se tiver uma
+    draw_set_halign(fa_center);
+    
+    draw_text(centro_x, centro_y - 40, "GAME OVER");
+    draw_text(centro_x, centro_y + 10, "Pressione R para Reiniciar");
+    draw_text(centro_x, centro_y + 40, "Pressione Q para Sair");
+    
+    draw_set_halign(fa_left); // volta alinhamento padrão
+}
