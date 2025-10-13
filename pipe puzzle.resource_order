@@ -1,4 +1,6 @@
 {
   "FolderOrderSettings":[],
-  "ResourceOrderSettings":[],
+  "ResourceOrderSettings":[
+    {"name":"Sprite8","order":1,"path":"sprites/Sprite8/Sprite8.yy",},
+  ],
 }
