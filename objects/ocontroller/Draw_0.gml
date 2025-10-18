@@ -47,10 +47,10 @@ if (caminho_valido) {
 
 // Informações do nível
 draw_set_color(c_white);
-draw_set_font(-1);
+draw_set_font(fnt_game);
 draw_text(10, 10, "Nível: " + string(nivel_atual));
 draw_text(10, 30, "Pontuação: " + string(pontuacao));
-var texto_dificuldade = "Facil";
+var texto_dificuldade = "Fácil";
 if (dificuldade == 2) texto_dificuldade = "Médio";
 if (dificuldade == 3) texto_dificuldade = "Difícil";
 draw_text(10, 50, "Dificuldade: " + texto_dificuldade);
@@ -74,7 +74,7 @@ draw_text(10, 90, "Dicas: " + string(hints_disponiveis));
 
 // Controles
 draw_set_color(c_white);
-draw_text(offset_x, status_y + 25, "Controles: Botao Esquerdo = Arrastar e Mover Peça");
+draw_text(offset_x, status_y + 25, "Controles: Botão Esquerdo = Arrastar e Mover Peça");
 draw_text(offset_x, status_y + 40, "Total de peças: " + string(total_pecas));
 draw_text(offset_x, status_y + 55, "H = Dica | R = Reiniciar | ESC = Pausar | N = Próximo nível (quando completo)");
 
@@ -130,7 +130,7 @@ if (game_over_ativo) {
     var centro_y = display_get_gui_height() / 2;
     
     draw_set_color(c_white);
-    draw_set_font(-1); // usa a fonte padrão, pode trocar por fnt_gameover se tiver uma
+    draw_set_font(fnt_game);
     draw_set_halign(fa_center);
     
     draw_text(centro_x, centro_y - 40, "GAME OVER");

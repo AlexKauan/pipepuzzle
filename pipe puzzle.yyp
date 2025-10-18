@@ -38,13 +38,16 @@
   },
   "name":"pipe puzzle",
   "resources":[
+    {"id":{"name":"fnt_game","path":"fonts/fnt_game/fnt_game.yy",},},
     {"id":{"name":"ocontroller","path":"objects/ocontroller/ocontroller.yy",},},
+    {"id":{"name":"omenu","path":"objects/omenu/omenu.yy",},},
     {"id":{"name":"opeca","path":"objects/opeca/opeca.yy",},},
     {"id":{"name":"opeca2","path":"objects/opeca2/opeca2.yy",},},
     {"id":{"name":"opeca3","path":"objects/opeca3/opeca3.yy",},},
     {"id":{"name":"opeca4","path":"objects/opeca4/opeca4.yy",},},
     {"id":{"name":"Room1","path":"rooms/Room1/Room1.yy",},},
     {"id":{"name":"Room2","path":"rooms/Room2/Room2.yy",},},
+    {"id":{"name":"RoomMenu","path":"rooms/RoomMenu/RoomMenu.yy",},},
     {"id":{"name":"sagua","path":"sprites/sagua/sagua.yy",},},
     {"id":{"name":"sdrag","path":"sprites/sdrag/sdrag.yy",},},
     {"id":{"name":"Sprite3","path":"sprites/Sprite3/Sprite3.yy",},},
@@ -57,8 +60,9 @@
   "resourceType":"GMProject",
   "resourceVersion":"2.0",
   "RoomOrderNodes":[
-    {"roomId":{"name":"Room2","path":"rooms/Room2/Room2.yy",},},
+    {"roomId":{"name":"RoomMenu","path":"rooms/RoomMenu/RoomMenu.yy",},},
     {"roomId":{"name":"Room1","path":"rooms/Room1/Room1.yy",},},
+    {"roomId":{"name":"Room2","path":"rooms/Room2/Room2.yy",},},
   ],
   "templateType":"game",
   "TextureGroups":[
