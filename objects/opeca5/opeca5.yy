@@ -1,9 +1,7 @@
 {
   "$GMObject":"",
   "%Name":"opeca5",
-  "eventList":[
-    {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":0,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
-  ],
+  "eventList":[],
   "managed":true,
   "name":"opeca5",
   "overriddenProperties":[],
@@ -33,14 +31,9 @@
   "resourceVersion":"2.0",
   "solid":false,
   "spriteId":{
-    "name":"Sprite4",
-    "path":"sprites/Sprite4/Sprite4.yy",
+    "name":"Sprite12",
+    "path":"sprites/Sprite12/Sprite12.yy",
   },
   "spriteMaskId":null,
   "visible":true,
 }
-
-
-
-
-
