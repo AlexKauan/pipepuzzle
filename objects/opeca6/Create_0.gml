@@ -1,8 +1,8 @@
 // Herda do pai
 event_inherited();
 
-// opeca6 - Curva em T (conecta 3 direções)
-conexoes = [0, 1, 2]; // conecta cima, direita, baixo
+// opeca6 (Sprite13) - curva em L (baixo-esquerda)
+conexoes = [2, 3]; // conecta baixo e esquerda
 
 
 

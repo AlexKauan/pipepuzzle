@@ -112,6 +112,13 @@ function reiniciar_nivel() {
     game_over_ativo = false;
     
     configurar_nivel(nivel_atual);
+    
+    // Limpa e recria os grids
+    ds_grid_resize(grid, grid_width, grid_height);
+    ds_grid_clear(grid, -1);
+    ds_grid_resize(grid_solucao, grid_width, grid_height);
+    ds_grid_clear(grid_solucao, -1);
+    
     criar_pecas_do_nivel();
     verificar_caminho();
     
@@ -139,6 +146,13 @@ function proximo_nivel() {
     game_over_ativo = false;
     
     configurar_nivel(nivel_atual);
+    
+    // Limpa e recria os grids
+    ds_grid_resize(grid, grid_width, grid_height);
+    ds_grid_clear(grid, -1);
+    ds_grid_resize(grid_solucao, grid_width, grid_height);
+    ds_grid_clear(grid_solucao, -1);
+    
     criar_pecas_do_nivel();
     verificar_caminho();
     

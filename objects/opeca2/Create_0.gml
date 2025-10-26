@@ -1,7 +1,7 @@
 // Herda do pai
 event_inherited();
 
-// opeca2 (Sprite5) - tubo reto horizontal
-conexoes = [1, 3]; // conecta direita e esquerda
+// opeca2 (Sprite5) - curva L (cima-direita)
+conexoes = [0, 1]; // conecta cima e direita
 
 

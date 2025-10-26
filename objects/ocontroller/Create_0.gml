@@ -92,6 +92,14 @@ for (var i = 0; i < grid_width; i++) {
     }
 }
 
+// Grid de solução - armazena qual tipo de peça deve estar em cada célula
+// -1 = sem peça necessária, 0-5 = tipo de peça necessária (opeca, opeca2, etc)
+grid_solucao = ds_grid_create(grid_width, grid_height);
+ds_grid_clear(grid_solucao, -1);
+
+// Lista de células que fazem parte do caminho correto
+caminho_correto = ds_list_create();
+
 // Calcular offset para centralizar o grid
 offset_x = (room_width - (grid_width * cell_size)) / 2;
 offset_y = (room_height - (grid_height * cell_size)) / 2 - 50; 
@@ -100,213 +108,513 @@ offset_y = (room_height - (grid_height * cell_size)) / 2 - 50;
 // Inicia o timer
 tempo_inicio = current_time;
 
-// Funções de IA removidas - apenas movimento manual das peças
-
 // ============================================
-// FUNÇÕES DE VALIDAÇÃO DE CAMINHO
+// FUNÇÕES DE GERAÇÃO DE CAMINHO CORRETO
 // ============================================
 
-/// @function verificar_caminho()
-/// @description Valida se existe um caminho válido da origem ao destino usando BFS
-verificar_caminho = function() {
-    // Reseta o estado de água de todas as peças
-    with(opeca) {
-        tem_agua = false;
-    }
-    
-    // Inicializa estruturas para BFS
-    var fila = ds_list_create();
-    var visitados = ds_grid_create(grid_width, grid_height);
-    ds_grid_clear(visitados, 0);
+/// @function gerar_caminho_correto()
+/// @description Gera um caminho aleatório válido da origem ao destino com maior variação
+function gerar_caminho_correto() {
+    // Limpa a solução anterior
+    ds_grid_clear(grid_solucao, -1);
+    ds_list_clear(caminho_correto);
     
     // Array de direções: [dx, dy]
     // Direções: 0 = cima, 1 = direita, 2 = baixo, 3 = esquerda
     var dir_x = [0, 1, 0, -1];
     var dir_y = [-1, 0, 1, 0];
     
-    // Adiciona origem à fila
-    ds_list_add(fila, ponto_origem_x, ponto_origem_y);
-    visitados[# ponto_origem_x, ponto_origem_y] = 1;
+    var caminho_gerado = false;
+    var tentativa_global = 0;
+    var max_tentativas_globais = 100;
     
-    var encontrou_destino = false;
+    // Define complexidade mínima do caminho baseado no grid e dificuldade
+    var tamanho_minimo = floor((grid_width + grid_height) * 0.8); // 80% do perímetro
+    var tamanho_maximo = (grid_width * grid_height) * 0.4; // 40% das células
     
-    // BFS simplificado
-    while (ds_list_size(fila) > 0) {
-        var cx = ds_list_find_value(fila, 0);
-        var cy = ds_list_find_value(fila, 1);
-        ds_list_delete(fila, 0);
-        ds_list_delete(fila, 0);
+    while (!caminho_gerado && tentativa_global < max_tentativas_globais) {
+        tentativa_global++;
+        ds_list_clear(caminho_correto);
         
-        // Verifica se chegou ao destino
-        if (cx == ponto_destino_x && cy == ponto_destino_y) {
-            encontrou_destino = true;
-            break;
-        }
+        // Começa na origem
+        var cx = ponto_origem_x;
+        var cy = ponto_origem_y;
+        ds_list_add(caminho_correto, cx, cy);
         
-        // Marca a peça atual como tendo água (se existir)
-        var peca_atual = grid[# cx, cy];
-        if (peca_atual != -1 && instance_exists(peca_atual)) {
-            peca_atual.tem_agua = true;
-        }
+        var passos = 0;
+        var max_passos = grid_width * grid_height * 2;
+        var modo_exploracao = true; // Alterna entre exploração e aproximação
+        var contador_exploracao = 0;
         
-        // Verifica todas as direções
+        // Gera caminho até chegar ao destino
+        while ((cx != ponto_destino_x || cy != ponto_destino_y) && passos < max_passos) {
+            passos++;
+            
+            // Lista de direções possíveis
+            var dirs_possiveis = [];
+            var pesos_direcoes = []; // Peso para cada direção
+            
         for (var i = 0; i < 4; i++) {
             var nx = cx + dir_x[i];
             var ny = cy + dir_y[i];
             
-            // Verifica limites do grid
+                // Verifica limites
             if (nx < 0 || nx >= grid_width || ny < 0 || ny >= grid_height) {
                 continue;
             }
             
-            // Verifica se já foi visitado
-            if (visitados[# nx, ny] == 1) {
-                continue;
-            }
-            
-            // Se é o destino, adiciona à fila (destino não precisa ter peça)
-            if (nx == ponto_destino_x && ny == ponto_destino_y) {
-                ds_list_add(fila, nx, ny);
-                visitados[# nx, ny] = 1;
-                continue;
-            }
-            
-            // Se é a origem, adiciona à fila (origem não precisa ter peça)
-            if (nx == ponto_origem_x && ny == ponto_origem_y) {
-                ds_list_add(fila, nx, ny);
-                visitados[# nx, ny] = 1;
-                continue;
-            }
-            
-            // Verifica se há peça na próxima célula
-            var proxima_peca_id = grid[# nx, ny];
-            if (proxima_peca_id == -1 || !instance_exists(proxima_peca_id)) {
-                continue;
-            }
-            
-            var proxima_peca = proxima_peca_id;
-            var conexoes_proxima = proxima_peca.conexoes;
-            
-            // Verifica se a próxima peça tem conexão de volta (direção oposta)
-            var dir_entrada = (i + 2) mod 4; // direção oposta
-            var proxima_tem_conexao = false;
-            for (var k = 0; k < array_length(conexoes_proxima); k++) {
-                if (conexoes_proxima[k] == dir_entrada) {
-                    proxima_tem_conexao = true;
-                    break;
-                }
-            }
-            
-            // Se a peça atual tem conexão nesta direção E a próxima tem conexão de volta
-            var peca_atual_id = grid[# cx, cy];
-            var peca_atual_tem_conexao = false;
-            
-            if (peca_atual_id != -1 && instance_exists(peca_atual_id)) {
-                var peca_atual_obj = peca_atual_id;
-                var conexoes_atual = peca_atual_obj.conexoes;
-                for (var j = 0; j < array_length(conexoes_atual); j++) {
-                    if (conexoes_atual[j] == i) {
-                        peca_atual_tem_conexao = true;
+                // Evita voltar para células já no caminho (exceto destino)
+                var ja_no_caminho = false;
+                for (var j = 0; j < ds_list_size(caminho_correto); j += 2) {
+                    var path_x = ds_list_find_value(caminho_correto, j);
+                    var path_y = ds_list_find_value(caminho_correto, j + 1);
+                    if (nx == path_x && ny == path_y) {
+                        ja_no_caminho = true;
                         break;
                     }
                 }
-            } else {
-                // Se não há peça na posição atual (origem), considera que tem conexão
-                peca_atual_tem_conexao = true;
+                
+                if (ja_no_caminho && !(nx == ponto_destino_x && ny == ponto_destino_y)) {
+                continue;
             }
             
-            if (proxima_tem_conexao && peca_atual_tem_conexao) {
-                ds_list_add(fila, nx, ny);
-                visitados[# nx, ny] = 1;
+                // Calcula peso para esta direção
+                var dist_destino = abs(nx - ponto_destino_x) + abs(ny - ponto_destino_y);
+                var dist_centro = abs(nx - grid_width/2) + abs(ny - grid_height/2);
+                
+                var peso = 1;
+                
+                // Alterna entre modo exploração e aproximação
+                if (modo_exploracao) {
+                    // Favorece ir para o centro ou explorar
+                    peso = 100 - dist_centro * 10;
+                    // Evita ir muito direto ao destino cedo demais
+                    if (dist_destino == 0) peso += 1000; // Mas sempre quer chegar se possível
+                } else {
+                    // Favorece aproximar do destino
+                    peso = 100 - dist_destino * 15;
+                }
+                
+                // Adiciona um fator aleatório para variação
+                peso += random(40);
+                
+                array_push(dirs_possiveis, i);
+                array_push(pesos_direcoes, peso);
+            }
+            
+            // Se não há direções possíveis, falhou - tenta novamente
+            if (array_length(dirs_possiveis) == 0) {
+                break; // Sai do while interno e tenta gerar novo caminho
+            }
+            
+            // Escolhe direção baseado nos pesos
+            var escolha_dir = -1;
+            var maior_peso = -9999;
+            
+            for (var i = 0; i < array_length(dirs_possiveis); i++) {
+                if (pesos_direcoes[i] > maior_peso) {
+                    maior_peso = pesos_direcoes[i];
+                    escolha_dir = dirs_possiveis[i];
+                }
+            }
+            
+            // Move na direção escolhida
+            cx = cx + dir_x[escolha_dir];
+            cy = cy + dir_y[escolha_dir];
+            
+            // Adiciona ao caminho
+            ds_list_add(caminho_correto, cx, cy);
+            
+            // Alterna entre exploração e aproximação
+            contador_exploracao++;
+            if (contador_exploracao > irandom_range(3, 8)) {
+                modo_exploracao = !modo_exploracao;
+                contador_exploracao = 0;
+            }
+            
+            // Se está muito perto do destino, força modo aproximação
+            var dist_atual = abs(cx - ponto_destino_x) + abs(cy - ponto_destino_y);
+            if (dist_atual <= 3) {
+                modo_exploracao = false;
+            }
+        }
+        
+        // Verifica se chegou ao destino
+        if (cx == ponto_destino_x && cy == ponto_destino_y) {
+            var tamanho_caminho = ds_list_size(caminho_correto) / 2;
+            
+            // Verifica se o caminho tem tamanho adequado
+            if (tamanho_caminho >= tamanho_minimo) {
+                caminho_gerado = true;
+                show_debug_message("Caminho válido gerado na tentativa " + string(tentativa_global));
+            } else {
+                show_debug_message("Caminho muito curto (" + string(tamanho_caminho) + "), tentando novamente...");
             }
         }
     }
     
-    // Limpa estruturas
-    ds_list_destroy(fila);
-    ds_grid_destroy(visitados);
+    // Se falhou em gerar caminho complexo, gera um simples
+    if (!caminho_gerado) {
+        show_debug_message("Gerando caminho simples como fallback...");
+        ds_list_clear(caminho_correto);
+        gerar_caminho_simples();
+    }
     
-    // Atualiza estado
-    caminho_valido = encontrou_destino;
-    fluxo_ativo = encontrou_destino;
+    // Mostra o caminho completo
+    show_debug_message("=== CAMINHO GERADO ===");
+    var caminho_str = "Caminho: ";
+    for (var i = 0; i < ds_list_size(caminho_correto); i += 2) {
+        var px = ds_list_find_value(caminho_correto, i);
+        var py = ds_list_find_value(caminho_correto, i + 1);
+        caminho_str += "[" + string(px) + "," + string(py) + "] → ";
+    }
+    show_debug_message(caminho_str);
     
-    // Debug
-    show_debug_message("Validação do caminho: " + string(encontrou_destino ? "VÁLIDO" : "INVÁLIDO"));
+    // Agora define qual peça deve estar em cada célula do caminho
+    show_debug_message("Processando células do caminho:");
+    for (var i = 0; i < ds_list_size(caminho_correto); i += 2) {
+        var cell_x = ds_list_find_value(caminho_correto, i);
+        var cell_y = ds_list_find_value(caminho_correto, i + 1);
+        
+        // Não coloca peça na origem ou destino
+        if ((cell_x == ponto_origem_x && cell_y == ponto_origem_y) ||
+            (cell_x == ponto_destino_x && cell_y == ponto_destino_y)) {
+            show_debug_message("  [" + string(cell_x) + "," + string(cell_y) + "] = Origem/Destino (pulado)");
+            continue;
+        }
+        
+        // Determina direção de entrada e saída
+        var dir_entrada = -1;
+        var dir_saida = -1;
+        
+        // IMPORTANTE: A peça deve ter conexões nas direções POR ONDE A LINHA PASSA
+        // Se a linha vem de CIMA, a peça tem conexão em CIMA
+        // Se a linha vai para ESQUERDA, a peça tem conexão em ESQUERDA
+        
+        // Direção de onde a linha vem (qual conexão a peça precisa ter)
+        if (i > 0) {
+            var prev_x = ds_list_find_value(caminho_correto, i - 2);
+            var prev_y = ds_list_find_value(caminho_correto, i - 1);
+            
+            // Calcula onde está prev em relação à célula atual
+            var dx = prev_x - cell_x; // positivo = prev à direita, negativo = prev à esquerda
+            var dy = prev_y - cell_y; // positivo = prev abaixo, negativo = prev acima
+            
+            // A peça precisa ter conexão na direção de onde vem a linha
+            if (dx == 1) dir_entrada = 1; // prev à direita → peça conecta à DIREITA
+            else if (dx == -1) dir_entrada = 3; // prev à esquerda → peça conecta à ESQUERDA
+            // NO GAMEMAKER, Y CRESCE PARA BAIXO!
+            else if (dy == 1) dir_entrada = 2; // prev abaixo → peça conecta em BAIXO
+            else if (dy == -1) dir_entrada = 0; // prev acima → peça conecta em CIMA
+        }
+        
+        // Direção para onde a linha vai (qual conexão a peça precisa ter)
+        if (i + 2 < ds_list_size(caminho_correto)) {
+            var next_x = ds_list_find_value(caminho_correto, i + 2);
+            var next_y = ds_list_find_value(caminho_correto, i + 3);
+            
+            // Calcula onde está next em relação à célula atual
+            var dx = next_x - cell_x; // positivo = next à direita, negativo = next à esquerda
+            var dy = next_y - cell_y; // positivo = next abaixo, negativo = next acima
+            
+            // A peça precisa ter conexão na direção para onde vai a linha
+            if (dx == 1) dir_saida = 1; // next à direita → peça conecta à DIREITA
+            else if (dx == -1) dir_saida = 3; // next à esquerda → peça conecta à ESQUERDA
+            // NO GAMEMAKER, Y CRESCE PARA BAIXO!
+            else if (dy == 1) dir_saida = 2; // next abaixo → peça conecta em BAIXO
+            else if (dy == -1) dir_saida = 0; // next acima → peça conecta em CIMA
+        }
+        
+        // Determina qual tipo de peça precisa baseado nas direções
+        var tipo_peca = determinar_tipo_peca(dir_entrada, dir_saida, dificuldade);
+        grid_solucao[# cell_x, cell_y] = tipo_peca;
+        
+        // Debug: mostra qual peça foi atribuída
+        var prev_info = "";
+        var next_info = "";
+        
+        if (i > 0) {
+            var prev_x = ds_list_find_value(caminho_correto, i - 2);
+            var prev_y = ds_list_find_value(caminho_correto, i - 1);
+            prev_info = "prev[" + string(prev_x) + "," + string(prev_y) + "]";
+        }
+        
+        if (i + 2 < ds_list_size(caminho_correto)) {
+            var next_x = ds_list_find_value(caminho_correto, i + 2);
+            var next_y = ds_list_find_value(caminho_correto, i + 3);
+            next_info = "next[" + string(next_x) + "," + string(next_y) + "]";
+        }
+        
+        var nome_dir_entrada = "";
+        var nome_dir_saida = "";
+        switch(dir_entrada) {
+            case 0: nome_dir_entrada = "↑cima"; break;
+            case 1: nome_dir_entrada = "→direita"; break;
+            case 2: nome_dir_entrada = "↓baixo"; break;
+            case 3: nome_dir_entrada = "←esquerda"; break;
+            default: nome_dir_entrada = "N/A"; break;
+        }
+        switch(dir_saida) {
+            case 0: nome_dir_saida = "↑cima"; break;
+            case 1: nome_dir_saida = "→direita"; break;
+            case 2: nome_dir_saida = "↓baixo"; break;
+            case 3: nome_dir_saida = "←esquerda"; break;
+            default: nome_dir_saida = "N/A"; break;
+        }
+        var nome_tipo = ["Vertical[↑↓]", "Curva[↑→]", "Curva[↑←]", "Horizontal[→←]", "Curva[↓→]", "Curva[↓←]"];
+        show_debug_message("  [" + string(cell_x) + "," + string(cell_y) + "] " + prev_info + " " + next_info + 
+                          " | Conexões: " + nome_dir_entrada + "+" + nome_dir_saida + " = " + nome_tipo[tipo_peca]);
+    }
     
-    return encontrou_destino;
+    show_debug_message("Caminho correto gerado com " + string(ds_list_size(caminho_correto) / 2) + " células");
 }
 
-// Valida o caminho inicial
-verificar_caminho();
+/// @function gerar_caminho_simples()
+/// @description Gera um caminho simples direto (fallback)
+function gerar_caminho_simples() {
+    var dir_x = [0, 1, 0, -1];
+    var dir_y = [-1, 0, 1, 0];
+    
+    var cx = ponto_origem_x;
+    var cy = ponto_origem_y;
+    ds_list_add(caminho_correto, cx, cy);
+    
+    // Vai primeiro na horizontal, depois na vertical
+    while (cx != ponto_destino_x) {
+        if (cx < ponto_destino_x) cx++;
+        else cx--;
+        ds_list_add(caminho_correto, cx, cy);
+    }
+    
+    while (cy != ponto_destino_y) {
+        if (cy < ponto_destino_y) cy++;
+        else cy--;
+        ds_list_add(caminho_correto, cx, cy);
+    }
+}
+
+/// @function determinar_tipo_peca(dir1, dir2, nivel_dificuldade)
+/// @description Determina qual tipo de peça é necessária baseado nas direções de conexão
+function determinar_tipo_peca(dir1, dir2, nivel_dificuldade = 1) {
+    // Garante que dir1 <= dir2 para facilitar comparação
+    if (dir1 > dir2) {
+        var temp = dir1;
+        dir1 = dir2;
+        dir2 = temp;
+    }
+    
+    // Direções: 0 = cima, 1 = direita, 2 = baixo, 3 = esquerda
+    // MAPEAMENTO CORRETO DOS SPRITES (CONFIRMADO):
+    // opeca (0): [0, 2] - vertical (cima-baixo) ↕
+    // opeca2 (1): [0, 1] - curva cima-direita ↗
+    // opeca3 (2): [0, 3] - curva cima-esquerda ↖
+    // opeca4 (3): [1, 3] - horizontal (direita-esquerda) ↔
+    // opeca5 (4): [2, 1] - curva baixo-direita ↘
+    // opeca6 (5): [2, 3] - curva baixo-esquerda ↙
+    
+    // Peças retas
+    if (dir1 == 0 && dir2 == 2) return 0; // opeca - vertical (cima-baixo) ↕
+    if (dir1 == 1 && dir2 == 3) return 3; // opeca4 - horizontal (direita-esquerda) ↔
+    
+    // Curvas L - todas as 4 orientações possíveis
+    if (dir1 == 0 && dir2 == 1) return 1; // opeca2 - cima-direita ↗
+    if (dir1 == 0 && dir2 == 3) return 2; // opeca3 - cima-esquerda ↖
+    if (dir1 == 1 && dir2 == 2) return 4; // opeca5 - baixo-direita ↘
+    if (dir1 == 2 && dir2 == 3) return 5; // opeca6 - baixo-esquerda ↙
+    
+    // Fallback - retorna peça reta
+    return choose(0, 3);
+}
+
+/// @function verificar_caminho()
+/// @description Valida se o jogador colocou as peças corretas no caminho
+function verificar_caminho() {
+    // Reseta o estado de água de todas as peças
+    with(opeca) {
+        tem_agua = false;
+    }
+    
+    var todas_corretas = true;
+    
+    // Verifica se cada célula do caminho tem a peça correta
+    for (var i = 0; i < ds_list_size(caminho_correto); i += 2) {
+        var cell_x = ds_list_find_value(caminho_correto, i);
+        var cell_y = ds_list_find_value(caminho_correto, i + 1);
+        
+        // Origem e destino não precisam de peça
+        if ((cell_x == ponto_origem_x && cell_y == ponto_origem_y) ||
+            (cell_x == ponto_destino_x && cell_y == ponto_destino_y)) {
+            continue;
+        }
+        
+        // Verifica se há uma peça esperada nesta célula
+        var tipo_esperado = grid_solucao[# cell_x, cell_y];
+        if (tipo_esperado == -1) continue; // Não precisa de peça
+        
+        // Verifica se há uma peça na célula
+        var peca_id = grid[# cell_x, cell_y];
+        if (peca_id == -1 || !instance_exists(peca_id)) {
+            todas_corretas = false;
+            continue;
+        }
+        
+        // Verifica se a peça é do tipo correto
+        var peca = peca_id;
+        var tipo_atual = -1;
+        
+        if (object_get_name(peca.object_index) == "opeca") tipo_atual = 0;
+        else if (object_get_name(peca.object_index) == "opeca2") tipo_atual = 1;
+        else if (object_get_name(peca.object_index) == "opeca3") tipo_atual = 2;
+        else if (object_get_name(peca.object_index) == "opeca4") tipo_atual = 3;
+        else if (object_get_name(peca.object_index) == "opeca5") tipo_atual = 4;
+        else if (object_get_name(peca.object_index) == "opeca6") tipo_atual = 5;
+        
+        if (tipo_atual != tipo_esperado) {
+            todas_corretas = false;
+        } else {
+            // Marca a peça como tendo água se estiver correta
+            peca.tem_agua = true;
+        }
+    }
+    
+    // Atualiza estado
+    caminho_valido = todas_corretas;
+    fluxo_ativo = todas_corretas;
+    
+    show_debug_message("Validação do caminho: " + string(todas_corretas ? "VÁLIDO" : "INVÁLIDO"));
+    
+    return todas_corretas;
+}
 
 // ============================================
 // FUNÇÃO DE CRIAÇÃO DE PEÇAS
 // ============================================
 
 /// @function criar_pecas_do_nivel()
-/// @description Cria peças aleatórias no grid para o jogador organizar
+/// @description Cria peças no grid baseado no caminho correto gerado
 function criar_pecas_do_nivel() {
     // Limpa o grid primeiro
     ds_grid_clear(grid, -1);
     total_pecas = 0;
     
-    // Tipos de peças disponíveis baseado na dificuldade
-    var tipos_disponiveis = [opeca, opeca2, opeca3, opeca4];
+    // Gera o caminho correto primeiro
+    gerar_caminho_correto();
     
-    // Adiciona peças mais complexas em níveis mais altos
-    if (dificuldade >= 2) {
-        array_push(tipos_disponiveis, opeca5); // Cruz
-    }
-    if (dificuldade >= 3) {
-        array_push(tipos_disponiveis, opeca6); // T
-    }
+    // Array com TODOS os objetos de peças (índices 0-5)
+    // Sempre mantém todos os 6 tipos no array para correspondência correta
+    var objetos_pecas = [opeca, opeca2, opeca3, opeca4, opeca5, opeca6];
     
-    // Define quantas peças criar baseado no tamanho do grid
-    var num_pecas = floor((grid_width * grid_height) * 0.4); // 40% do grid
+    // Lista para armazenar peças do caminho que serão criadas
+    var pecas_caminho = ds_list_create();
     
-    // Cria as peças em posições aleatórias
-    var pecas_criadas = 0;
-    var tentativas = 0;
-    
-    while (pecas_criadas < num_pecas && tentativas < 1000) {
-        tentativas++;
+    // Primeiro, identifica quais peças fazem parte do caminho correto
+    for (var i = 0; i < ds_list_size(caminho_correto); i += 2) {
+        var cell_x = ds_list_find_value(caminho_correto, i);
+        var cell_y = ds_list_find_value(caminho_correto, i + 1);
         
-        var gx = irandom(grid_width - 1);
-        var gy = irandom(grid_height - 1);
-        
-        // Não coloca peça na origem ou destino
-        if ((gx == ponto_origem_x && gy == ponto_origem_y) || 
-            (gx == ponto_destino_x && gy == ponto_destino_y)) {
+        // Pula origem e destino
+        if ((cell_x == ponto_origem_x && cell_y == ponto_origem_y) ||
+            (cell_x == ponto_destino_x && cell_y == ponto_destino_y)) {
             continue;
         }
         
-        // Verifica se a célula está vazia
-        if (grid[# gx, gy] == -1) {
-            // Escolhe um tipo aleatório de peça
-            var tipo_peca = tipos_disponiveis[irandom(array_length(tipos_disponiveis) - 1)];
+        var tipo_esperado = grid_solucao[# cell_x, cell_y];
+        if (tipo_esperado != -1) {
+            ds_list_add(pecas_caminho, cell_x, cell_y, tipo_esperado);
+        }
+    }
+    
+    // Agora cria as peças do caminho em posições ALEATÓRIAS no grid (não nas posições corretas)
+    for (var i = 0; i < ds_list_size(pecas_caminho); i += 3) {
+        var tipo = ds_list_find_value(pecas_caminho, i + 2);
+        
+        // Tenta encontrar uma posição aleatória vazia
+        var tentativas = 0;
+        var colocada = false;
+        
+        while (!colocada && tentativas < 100) {
+            tentativas++;
+            var rand_x = irandom(grid_width - 1);
+            var rand_y = irandom(grid_height - 1);
             
-            // Cria a peça
-            var peca_x = offset_x + gx * cell_size + cell_size / 2;
-            var peca_y = offset_y + gy * cell_size + cell_size / 2;
+            // Não coloca na origem ou destino
+            if ((rand_x == ponto_origem_x && rand_y == ponto_origem_y) ||
+                (rand_x == ponto_destino_x && rand_y == ponto_destino_y)) {
+                continue;
+            }
             
-            var peca = instance_create_layer(peca_x, peca_y, "Instances", tipo_peca);
+            // Verifica se está vazia
+            if (grid[# rand_x, rand_y] == -1) {
+                // Cria a peça do tipo correto
+                var obj_peca = objetos_pecas[tipo];
+                var peca_x = offset_x + rand_x * cell_size + cell_size / 2;
+                var peca_y = offset_y + rand_y * cell_size + cell_size / 2;
+                
+                var peca = instance_create_layer(peca_x, peca_y, "Instances", obj_peca);
+                peca.start_x = peca_x;
+                peca.start_y = peca_y;
+                peca.grid_x_inicial = rand_x;
+                peca.grid_y_inicial = rand_y;
+                
+                grid[# rand_x, rand_y] = peca.id;
+                total_pecas++;
+                colocada = true;
+            }
+        }
+    }
+    
+    // Adiciona peças "distratoras" (peças erradas) para dificultar
+    var num_distratoras = floor(ds_list_size(pecas_caminho) / 3 * 0.5); // 50% do número de peças corretas
+    
+    // Define quais tipos de peças podem ser usados nas distratoras baseado na dificuldade
+    var tipos_distratoras = [0, 1, 2, 3]; // Básicas sempre disponíveis
+    if (dificuldade >= 2) {
+        array_push(tipos_distratoras, 4); // Adiciona Cruz
+    }
+    if (dificuldade >= 3) {
+        array_push(tipos_distratoras, 5); // Adiciona T
+    }
+    
+    for (var i = 0; i < num_distratoras; i++) {
+        var tentativas = 0;
+        var colocada = false;
+        
+        while (!colocada && tentativas < 50) {
+            tentativas++;
+            var rand_x = irandom(grid_width - 1);
+            var rand_y = irandom(grid_height - 1);
             
-            // Define a posição inicial da peça
+            // Não coloca na origem ou destino
+            if ((rand_x == ponto_origem_x && rand_y == ponto_origem_y) ||
+                (rand_x == ponto_destino_x && rand_y == ponto_destino_y)) {
+                continue;
+            }
+            
+            // Verifica se está vazia
+            if (grid[# rand_x, rand_y] == -1) {
+                // Escolhe um tipo aleatório dos disponíveis para distração
+                var tipo_aleatorio = tipos_distratoras[irandom(array_length(tipos_distratoras) - 1)];
+                var obj_peca = objetos_pecas[tipo_aleatorio];
+                
+                var peca_x = offset_x + rand_x * cell_size + cell_size / 2;
+                var peca_y = offset_y + rand_y * cell_size + cell_size / 2;
+                
+                var peca = instance_create_layer(peca_x, peca_y, "Instances", obj_peca);
             peca.start_x = peca_x;
             peca.start_y = peca_y;
-            peca.grid_x_inicial = gx;
-            peca.grid_y_inicial = gy;
+                peca.grid_x_inicial = rand_x;
+                peca.grid_y_inicial = rand_y;
             
-            // Marca a célula como ocupada
-            grid[# gx, gy] = peca.id;
+                grid[# rand_x, rand_y] = peca.id;
             total_pecas++;
-            pecas_criadas++;
+                colocada = true;
+            }
         }
     }
     
     // Cria obstáculos em níveis mais avançados
     if (dificuldade >= 2) {
-        var num_obstaculos = 2 + floor(nivel_atual / 3); // Mais obstáculos em níveis altos
+        var num_obstaculos = 1 + floor(nivel_atual / 4); // Menos obstáculos agora
         var obstaculos_criados = 0;
         var tentativas_obstaculo = 0;
         
@@ -315,11 +623,24 @@ function criar_pecas_do_nivel() {
             var obs_x = irandom(grid_width - 1);
             var obs_y = irandom(grid_height - 1);
             
-            // Não coloca obstáculo na origem ou destino
+            // Não coloca obstáculo na origem, destino ou no caminho correto
             if ((obs_x == ponto_origem_x && obs_y == ponto_origem_y) ||
                 (obs_x == ponto_destino_x && obs_y == ponto_destino_y)) {
                 continue;
             }
+            
+            // Verifica se faz parte do caminho correto
+            var eh_caminho = false;
+            for (var j = 0; j < ds_list_size(caminho_correto); j += 2) {
+                var cam_x = ds_list_find_value(caminho_correto, j);
+                var cam_y = ds_list_find_value(caminho_correto, j + 1);
+                if (obs_x == cam_x && obs_y == cam_y) {
+                    eh_caminho = true;
+                    break;
+                }
+            }
+            
+            if (eh_caminho) continue;
             
             if (grid[# obs_x, obs_y] == -1) {
                 var obstaculo_x = offset_x + obs_x * cell_size + cell_size / 2;
@@ -339,7 +660,36 @@ function criar_pecas_do_nivel() {
         }
     }
     
+    // Limpa a lista temporária
+    ds_list_destroy(pecas_caminho);
+    
+    // Conta quantas peças de cada tipo foram criadas
+    var contador_tipos = [0, 0, 0, 0, 0, 0];
+    with(opeca) {
+        var tipo_atual = -1;
+        if (object_get_name(object_index) == "opeca") tipo_atual = 0;
+        else if (object_get_name(object_index) == "opeca2") tipo_atual = 1;
+        else if (object_get_name(object_index) == "opeca3") tipo_atual = 2;
+        else if (object_get_name(object_index) == "opeca4") tipo_atual = 3;
+        else if (object_get_name(object_index) == "opeca5") tipo_atual = 4;
+        else if (object_get_name(object_index) == "opeca6") tipo_atual = 5;
+        
+        if (tipo_atual != -1) {
+            contador_tipos[tipo_atual]++;
+        }
+    }
+    
+    show_debug_message("=== ESTATÍSTICAS DO NÍVEL ===");
     show_debug_message("Total de peças criadas: " + string(total_pecas));
+    show_debug_message("Peças necessárias no caminho: " + string((ds_list_size(caminho_correto) / 2) - 2));
+    show_debug_message("Tipos de peças:");
+    show_debug_message("  - Vertical ↕ (opeca): " + string(contador_tipos[0]));
+    show_debug_message("  - Curva ↗ (opeca2): " + string(contador_tipos[1]));
+    show_debug_message("  - Curva ↖ (opeca3): " + string(contador_tipos[2]));
+    show_debug_message("  - Horizontal ↔ (opeca4): " + string(contador_tipos[3]));
+    show_debug_message("  - Curva ↘ (opeca5): " + string(contador_tipos[4]));
+    show_debug_message("  - Curva ↙ (opeca6): " + string(contador_tipos[5]));
+    show_debug_message("=============================");
 }
 
 // ============================================
@@ -417,6 +767,6 @@ function criar_efeito_erro(x, y) {
 // Cria as peças do nível inicial
 criar_pecas_do_nivel();
 
-// Valida o caminho inicial
+// Valida o caminho inicial (vai retornar false pois as peças estão em posições aleatórias)
 verificar_caminho();
 
