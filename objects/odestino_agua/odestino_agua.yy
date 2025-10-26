@@ -27,7 +27,10 @@
   "resourceType":"GMObject",
   "resourceVersion":"2.0",
   "solid":false,
-  "spriteId":null,
+  "spriteId":{
+    "name":"sdestino_agua",
+    "path":"sprites/sdestino_agua/sdestino_agua.yy",
+  },
   "spriteMaskId":null,
   "visible":true,
 }

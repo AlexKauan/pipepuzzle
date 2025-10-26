@@ -14,21 +14,56 @@ for (var j = 0; j <= grid_height; j++) {
 draw_set_alpha(1);
 draw_set_color(c_white);
 
-// Desenha ponto de origem (verde)
-var origem_x = offset_x + ponto_origem_x * cell_size + cell_size / 2;
-var origem_y = offset_y + ponto_origem_y * cell_size + cell_size / 2;
-draw_set_color(c_lime);
-draw_circle(origem_x, origem_y, 16, false);
-draw_set_color(c_black);
-draw_text(origem_x - 15, origem_y - 10, "INÍCIO");
+// ===============================
+// DESENHA PONTO DE ORIGEM (sprite do oorigem_agua)
+// ===============================
+var origem_x = offset_x + (ponto_origem_x) * cell_size;
+var origem_y = offset_y + (ponto_origem_y) * cell_size;
 
-// Desenha ponto de destino (vermelho)
-var destino_x = offset_x + ponto_destino_x * cell_size + cell_size / 2;
-var destino_y = offset_y + ponto_destino_y * cell_size + cell_size / 2;
-draw_set_color(c_red);
-draw_circle(destino_x, destino_y, 16, false);
-draw_set_color(c_black);
-draw_text(destino_x - 10, destino_y - 10, "FIM");
+// Pega o sprite do objeto oorigem_agua
+var spr_origem = object_get_sprite(oorigem_agua);
+
+// Verifica se o sprite existe antes de desenhar
+if (sprite_exists(spr_origem)) {
+    // Escala para ajustar o sprite ao tamanho da célula
+    var escala = cell_size / sprite_get_width(spr_origem);
+    
+    draw_sprite_ext(
+        spr_origem,
+        0, // subimagem
+        origem_x,
+        origem_y,
+        escala,
+        escala,
+        0, // rotação
+        c_white,
+        1  // alpha
+    );
+}
+
+// ===============================
+// DESENHA PONTO DE DESTINO (sprite do odestino_agua)
+// ===============================
+var destino_x = offset_x + ponto_destino_x * cell_size;
+var destino_y = offset_y + ponto_destino_y * cell_size;
+
+var spr_destino = object_get_sprite(odestino_agua);
+
+if (sprite_exists(spr_destino)) {
+    var escala = cell_size / sprite_get_width(spr_destino);
+    
+    draw_sprite_ext(
+        spr_destino,
+        0,
+        destino_x,
+        destino_y,
+        escala,
+        escala,
+        0,
+        c_white,
+        1
+    );
+}
 
 // Desenha status do caminho
 draw_set_color(c_white);
