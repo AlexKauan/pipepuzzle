@@ -129,8 +129,6 @@ function reiniciar_nivel() {
 function proximo_nivel() {
     nivel_atual++;
     
-    with(ogamesave) salvar_dados();
-    
     with(opeca) instance_destroy();
     
     var obstaculo_id = asset_get_index("oobstaculo");
