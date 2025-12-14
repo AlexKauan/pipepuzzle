@@ -1,7 +1,9 @@
 // Botão esquerdo - arrastar peça
+var half = global.gc.cell_size * 0.5;
+
 if (mouse_check_button_pressed(mb_left) &&
-    mouse_x > x-32 && mouse_x < x+32 &&
-    mouse_y > y-32 && mouse_y < y+32) {
+    mouse_x > x - half && mouse_x < x + half &&
+    mouse_y > y - half && mouse_y < y + half) {
     
     arrastando = true;
     offset_x_mouse = mouse_x - x;

@@ -10,7 +10,7 @@ nivel_atual = 1;
 dificuldade = 1; // 1 = Fácil, 2 = Médio, 3 = Difícil
 grid_width = 6;  // Começa menor e aumenta com o nível
 grid_height = 6;
-cell_size = 64;
+cell_size = 80; // aumenta o zoom visual do grid
 
 // Pontos de origem e destino do fluxo de água (dinâmicos baseado no nível)
 ponto_origem_x = 0;
@@ -31,6 +31,12 @@ tempo_restante = 0;
 // Sistema de hints
 hints_disponiveis = 3;
 hint_usado = false;
+hint_index = 0;
+hint_textos = [
+    "Dica: comece traçando da origem até a casa evitando becos sem saída.",
+    "Dica: deixe espaço para curvas; não feche laterais que ainda não ligaram.",
+    "Dica: se travar, use R para reiniciar e testar outro caminho rápido."
+];
 
 // Contador de peças
 total_pecas = 0;
@@ -100,9 +106,9 @@ ds_grid_clear(grid_solucao, -1);
 // Lista de células que fazem parte do caminho correto
 caminho_correto = ds_list_create();
 
-// Calcular offset para centralizar o grid
-offset_x = (room_width - (grid_width * cell_size)) / 2;
-offset_y = (room_height - (grid_height * cell_size)) / 2 - 50; 
+// Calcular offset para centralizar o grid (arredondado para evitar desalinhamento de 1px)
+offset_x = round((room_width - (grid_width * cell_size)) / 2);
+offset_y = round((room_height - (grid_height * cell_size)) / 2) - 50;
 // subtrai 50 para deixar espaço para a bancada embaixo
 
 // Inicia o timer

@@ -1,3 +1,15 @@
+// ============================================
+// BG geral
+// ============================================
+var spr_bg = asset_get_index("SpriteBgGame");
+if (spr_bg != -1 && sprite_exists(spr_bg)) {
+    draw_set_alpha(1);
+    draw_sprite_stretched(spr_bg, 0, 0, 0, room_width, room_height);
+}
+
+// ============================================
+// Grade
+// ============================================
 draw_set_color(c_gray);
 draw_set_alpha(0.5);
 
@@ -65,9 +77,9 @@ if (sprite_exists(spr_destino)) {
     );
 }
 
-// Desenha status do caminho
+// Desenha status do caminho (mais abaixo da grade)
 draw_set_color(c_white);
-var status_y = offset_y + grid_height * cell_size + 20;
+var status_y = offset_y + grid_height * cell_size + 60;
 if (caminho_valido) {
     draw_set_color(c_lime);
     draw_text(offset_x, status_y, "✓ PUZZLE COMPLETO - ÁGUA FLUINDO!");
@@ -80,38 +92,88 @@ if (caminho_valido) {
 // INTERFACE DO JOGO
 // ============================================
 
-// Informações do nível
-draw_set_color(c_white);
-draw_set_font(fnt_game);
-draw_text(10, 10, "Nível: " + string(nivel_atual));
-draw_text(10, 30, "Pontuação: " + string(pontuacao));
-var texto_dificuldade = "Fácil";
-if (dificuldade == 2) texto_dificuldade = "Médio";
-if (dificuldade == 3) texto_dificuldade = "Difícil";
-draw_text(10, 50, "Dificuldade: " + texto_dificuldade);
+// Informações do nível (HUD horizontal sobre o grid)
+var hud_x1 = offset_x - 12;
+var hud_x2 = offset_x + grid_width * cell_size + 12;
+var hud_y2 = offset_y - 8;
+var hud_y1 = hud_y2 - 40; // altura um pouco maior
 
-// Timer
+draw_set_alpha(0.72);
+draw_set_color(make_color_rgb(16, 28, 44)); // fundo escuro azulado
+draw_roundrect(hud_x1, hud_y1, hud_x2, hud_y2, false);
+
+draw_set_color(make_color_rgb(255, 204, 80)); // contorno dourado
+draw_roundrect(hud_x1 + 2, hud_y1 + 2, hud_x2 - 2, hud_y2 - 2, false);
+
+draw_set_alpha(1);
+draw_set_font(fnt_game);
+draw_set_halign(fa_center);
+draw_set_valign(fa_middle);
+
 var minutos = floor(tempo_restante / 60);
 var segundos = floor(tempo_restante mod 60);
 var cor_tempo = c_white;
 if (tempo_restante < 30) cor_tempo = c_red;
 else if (tempo_restante < 60) cor_tempo = c_yellow;
 
-draw_set_color(cor_tempo);
-// Formata os segundos com zero à esquerda se necessário
 var segundos_str = string(segundos);
 if (segundos < 10) segundos_str = "0" + segundos_str;
-draw_text(10, 70, "Tempo: " + string(minutos) + ":" + segundos_str);
 
-// Hints
+var texto_dificuldade = "Fácil";
+if (dificuldade == 2) texto_dificuldade = "Médio";
+if (dificuldade == 3) texto_dificuldade = "Difícil";
+
+var linha_info = "Nível: " + string(nivel_atual)
+    + "  |  Pontuação: " + string(pontuacao)
+    + "  |  Dificuldade: " + texto_dificuldade
+    + "  |  Tempo: " + string(minutos) + ":" + segundos_str
+    + "  |  Dicas: " + string(hints_disponiveis);
+
+// Texto único na horizontal
 draw_set_color(c_white);
-draw_text(10, 90, "Dicas: " + string(hints_disponiveis));
+var texto_x = (hud_x1 + hud_x2) * 0.5;
+var texto_y = (hud_y1 + hud_y2) * 0.5;
+draw_text_ext(texto_x, texto_y, linha_info, 1.6, 4000);
+
+// Painel inferior (status e controles)
+var info_y1 = status_y - 16;
+var info_y2 = status_y + 120; // mais alto para espaçamento maior entre linhas
+var info_x1 = offset_x - 12;
+var info_x2 = offset_x + grid_width * cell_size + 12;
+var info_width = (info_x2 - info_x1) - 28; // área útil para quebra de linha
+
+draw_set_alpha(0.7);
+draw_set_color(make_color_rgb(16, 28, 44)); // fundo escuro azulado
+draw_roundrect(info_x1, info_y1, info_x2, info_y2, false);
+
+draw_set_color(make_color_rgb(255, 204, 80)); // contorno dourado
+draw_roundrect(info_x1 + 2, info_y1 + 2, info_x2 - 2, info_y2 - 2, false);
+
+draw_set_alpha(1);
+draw_set_color(c_white);
+draw_set_halign(fa_left);
+draw_set_valign(fa_top);
+
+// Texto dentro do painel com padding
+var tx_panel = info_x1 + 14;
+var ty_panel = info_y1 + 12;
+var line_gap = 24; // espaçamento vertical entre linhas
+
+// Status de conexão
+if (caminho_valido) {
+    draw_set_color(c_lime);
+    draw_text_ext(tx_panel, ty_panel, "✓ PUZZLE COMPLETO - ÁGUA FLUINDO!", 2.0, info_width);
+} else {
+    draw_set_color(c_red);
+    draw_text_ext(tx_panel, ty_panel, "✗ Reorganize as peças para conectar do INÍCIO ao FIM", 2.0, info_width);
+}
 
 // Controles
 draw_set_color(c_white);
-draw_text(offset_x, status_y + 25, "Controles: Botão Esquerdo = Arrastar e Mover Peça");
-draw_text(offset_x, status_y + 40, "Total de peças: " + string(total_pecas));
-draw_text(offset_x, status_y + 55, "H = Dica | R = Reiniciar | ESC = Pausar | N = Próximo nível (quando completo)");
+draw_text_ext(tx_panel, ty_panel + line_gap, "Controles: Botão Esquerdo = Arrastar e Mover Peça", 2.0, info_width);
+draw_text_ext(tx_panel, ty_panel + line_gap * 2, "Total de peças: " + string(total_pecas), 2.0, info_width);
+draw_text_ext(tx_panel, ty_panel + line_gap * 3, "H = Dica | R = Reiniciar | ESC = Pausar | N = Próximo nível", 2.0, info_width);
+draw_text_ext(tx_panel, ty_panel + line_gap * 4, "(quando completo)", 2.0, info_width);
 
 // Pausa
 if (jogo_pausado) {
@@ -128,13 +190,7 @@ if (jogo_pausado) {
     draw_set_valign(fa_top);
 }
 
-// Hint ativo
-if (mostrar_hint) {
-    draw_set_color(c_yellow);
-    draw_set_halign(fa_center);
-    draw_text(room_width/2, 100, "💡 DICA: Conecte as peças do INÍCIO ao FIM!");
-    draw_set_halign(fa_left);
-}
+// Hint ativo (movido para Draw GUI)
 
 // Jogo completo
 if (jogo_completo) {
@@ -246,28 +302,4 @@ if (global.mostrar_debug) {
     draw_text(10, 110, "DEBUG: Pressione D para ocultar | Verde = Peça correta nesta posição");
 }
 
-// ============================================
-// TELA DE GAME OVER
-// ============================================
-
-if (game_over_ativo) {
-    // Fundo escurecido
-    draw_set_color(c_black);
-    draw_set_alpha(0.7);
-    draw_rectangle(0, 0, display_get_gui_width(), display_get_gui_height(), false);
-    draw_set_alpha(1);
-    
-    // Texto principal (centralizado)
-    var centro_x = display_get_gui_width() / 2;
-    var centro_y = display_get_gui_height() / 2;
-    
-    draw_set_color(c_white);
-    draw_set_font(fnt_game);
-    draw_set_halign(fa_center);
-    
-    draw_text(centro_x, centro_y - 40, "GAME OVER");
-    draw_text(centro_x, centro_y + 10, "Pressione R para Reiniciar");
-    draw_text(centro_x, centro_y + 40, "Pressione Q para Sair");
-    
-    draw_set_halign(fa_left); // volta alinhamento padrão
-}
+// (Game Over movido para Draw GUI)

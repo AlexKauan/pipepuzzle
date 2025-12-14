@@ -17,6 +17,8 @@ switch (tipo_obstaculo) {
         break;
 }
 
+// Obstáculos desenham atrás das peças
+depth = 10;
 
 
 

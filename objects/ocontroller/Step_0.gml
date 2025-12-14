@@ -2,8 +2,8 @@
 // CONTROLE DO JOGO
 // ============================================
 
-// Pausa o jogo com ESC
-if (keyboard_check_pressed(vk_escape)) {
+// Pausa o jogo com ESC (somente se não estiver em game over)
+if (!game_over_ativo && keyboard_check_pressed(vk_escape)) {
     jogo_pausado = !jogo_pausado;
 }
 
@@ -47,8 +47,12 @@ if (keyboard_check_pressed(ord("N")) && jogo_completo) {
 if (game_over_ativo) {
     // Reiniciar fase
     if (keyboard_check_pressed(ord("R"))) {
-        game_over_ativo = false;
         reiniciar_nivel();
+    }
+
+    // Sair (ESC) durante game over
+    if (keyboard_check_pressed(vk_escape)) {
+        game_end();
     }
 
     // Fechar jogo
@@ -86,6 +90,10 @@ function game_over_tempo() {
 function usar_hint() {
     hints_disponiveis--;
     mostrar_hint = true;
+    
+    // Sorteia/cicla o texto da dica
+    hint_index = (hint_index + 1) mod array_length(hint_textos);
+    hint_texto_atual = hint_textos[hint_index];
     
     var origem_x = offset_x + ponto_origem_x * cell_size + cell_size / 2;
     var origem_y = offset_y + ponto_origem_y * cell_size + cell_size / 2;

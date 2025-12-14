@@ -20,3 +20,6 @@ conexoes = [0, 2]; // conecta cima e baixo
 
 // Rotação da peça (0, 90, 180, 270)
 rotacao = 0;
+
+// Garantir que a peça desenhe acima de obstáculos
+depth = -10;
