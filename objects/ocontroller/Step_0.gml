@@ -88,19 +88,62 @@ function game_over_tempo() {
 
 /// @function usar_hint()
 function usar_hint() {
+    // Consome dica
     hints_disponiveis--;
-    mostrar_hint = true;
-    
-    // Sorteia/cicla o texto da dica
-    hint_index = (hint_index + 1) mod array_length(hint_textos);
-    hint_texto_atual = hint_textos[hint_index];
-    
-    var origem_x = offset_x + ponto_origem_x * cell_size + cell_size / 2;
-    var origem_y = offset_y + ponto_origem_y * cell_size + cell_size / 2;
-    criar_efeito_agua(origem_x, origem_y);
-    
-    alarm[0] = 180; // 3 segundos em 60 FPS
-    show_debug_message("Dica usada! Restam: " + string(hints_disponiveis));
+
+    // Limpa qualquer hint anterior
+    hint_cell_x = -1;
+    hint_cell_y = -1;
+    hint_cell_tipo = -1;
+
+    var objetos_pecas = [opeca, opeca2, opeca3, opeca4, opeca5, opeca6];
+
+    // Procura uma célula da solução que ainda não está correta
+    var achou = false;
+    for (var yy = 0; yy < grid_height && !achou; yy++) {
+        for (var xx = 0; xx < grid_width && !achou; xx++) {
+            var tipo = grid_solucao[# xx, yy];
+            if (tipo != -1) {
+                var inst_id = grid[# xx, yy];
+                var correto = false;
+                if (inst_id != -1 && instance_exists(inst_id)) {
+                    var obj_id = inst_id.object_index; // fix: object_index é variável do id
+                    var esperado_obj = objetos_pecas[tipo];
+                    if (obj_id == esperado_obj) {
+                        correto = true;
+                    }
+                }
+                if (!correto) {
+                    hint_cell_x = xx;
+                    hint_cell_y = yy;
+                    hint_cell_tipo = tipo;
+                    achou = true;
+                }
+            }
+        }
+    }
+
+    // Se não achou divergência, mostra a primeira célula da solução
+    if (!achou) {
+        for (var yy = 0; yy < grid_height && !achou; yy++) {
+            for (var xx = 0; xx < grid_width && !achou; xx++) {
+                var tipo = grid_solucao[# xx, yy];
+                if (tipo != -1) {
+                    hint_cell_x = xx;
+                    hint_cell_y = yy;
+                    hint_cell_tipo = tipo;
+                    achou = true;
+                }
+            }
+        }
+    }
+
+    // Ativa visual da dica por tempo limitado
+    if (achou) {
+        mostrar_hint = false; // não usamos texto
+        hint_timer = 180; // ~3s a 60 FPS
+        show_debug_message("Dica usada! Restam: " + string(hints_disponiveis));
+    }
 }
 
 /// @function reiniciar_nivel()
@@ -117,6 +160,11 @@ function reiniciar_nivel() {
     fluxo_ativo = false;
     tempo_inicio = current_time;
     mostrar_hint = false;
+    mostrar_hint_cell = false;
+    hint_cell_x = -1;
+    hint_cell_y = -1;
+    hint_cell_tipo = -1;
+    hint_timer = 0;
     game_over_ativo = false;
     
     configurar_nivel(nivel_atual);
@@ -169,6 +217,11 @@ function proximo_nivel() {
 // ALARMES
 // ============================================
 
-if (alarm[0] <= 0) {
-    mostrar_hint = false;
+if (hint_timer > 0) {
+    hint_timer--;
+} else {
+    hint_timer = 0;
+    hint_cell_x = -1;
+    hint_cell_y = -1;
+    hint_cell_tipo = -1;
 }

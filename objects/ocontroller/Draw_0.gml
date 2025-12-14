@@ -175,6 +175,34 @@ draw_text_ext(tx_panel, ty_panel + line_gap * 2, "Total de peças: " + string(to
 draw_text_ext(tx_panel, ty_panel + line_gap * 3, "H = Dica | R = Reiniciar | ESC = Pausar | N = Próximo nível", 2.0, info_width);
 draw_text_ext(tx_panel, ty_panel + line_gap * 4, "(quando completo)", 2.0, info_width);
 
+// Dica visual de célula (somente uma célula)
+if (hint_timer > 0 && hint_cell_x >= 0 && hint_cell_y >= 0) {
+    var cell_cx = offset_x + hint_cell_x * cell_size + cell_size * 0.5;
+    var cell_cy = offset_y + hint_cell_y * cell_size + cell_size * 0.5;
+    var cell_x1 = cell_cx - cell_size * 0.5;
+    var cell_y1 = cell_cy - cell_size * 0.5;
+    var cell_x2 = cell_cx + cell_size * 0.5;
+    var cell_y2 = cell_cy + cell_size * 0.5;
+
+    draw_set_alpha(0.35);
+    draw_set_color(c_yellow);
+    draw_rectangle(cell_x1, cell_y1, cell_x2, cell_y2, false);
+    draw_set_alpha(1);
+
+    var objetos_pecas = [opeca, opeca2, opeca3, opeca4, opeca5, opeca6];
+    if (hint_cell_tipo >= 0 && hint_cell_tipo < array_length(objetos_pecas)) {
+        var obj_needed = objetos_pecas[hint_cell_tipo];
+        var spr_needed = object_get_sprite(obj_needed);
+        if (spr_needed != -1) {
+            var spr_w = sprite_get_width(spr_needed);
+            var scale_hint = (spr_w != 0) ? (cell_size / spr_w) : 1;
+            draw_set_alpha(0.75);
+            draw_sprite_ext(spr_needed, 0, cell_cx, cell_cy, scale_hint, scale_hint, 0, c_white, 1);
+            draw_set_alpha(1);
+        }
+    }
+}
+
 // Pausa
 if (jogo_pausado) {
     draw_set_alpha(0.7);

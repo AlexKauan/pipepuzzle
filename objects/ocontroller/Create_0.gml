@@ -37,6 +37,10 @@ hint_textos = [
     "Dica: deixe espaço para curvas; não feche laterais que ainda não ligaram.",
     "Dica: se travar, use R para reiniciar e testar outro caminho rápido."
 ];
+hint_cell_x = -1;
+hint_cell_y = -1;
+hint_cell_tipo = -1;
+hint_timer = 0;
 
 // Contador de peças
 total_pecas = 0;
