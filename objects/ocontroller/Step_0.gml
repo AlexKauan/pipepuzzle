@@ -7,6 +7,26 @@ if (!game_over_ativo && keyboard_check_pressed(vk_escape)) {
     jogo_pausado = !jogo_pausado;
 }
 
+// Se está pausado e o jogador aperta S, salva e volta ao menu
+if (jogo_pausado && !game_over_ativo && keyboard_check_pressed(ord("S"))) {
+    var obj_save = asset_get_index("ogamesave");
+    if (obj_save != -1) {
+        var inst_save = instance_find(obj_save, 0);
+        if (!instance_exists(inst_save)) {
+            inst_save = instance_create_layer(0, 0, "Instances", obj_save);
+        }
+        global.save_inst = inst_save;
+        if (instance_exists(inst_save)) {
+            with (inst_save) salvar_dados();
+        }
+    }
+    if (room_exists(RoomMenu)) {
+        room_goto(RoomMenu);
+    } else {
+        room_goto_first();
+    }
+}
+
 // Se o jogo não está pausado, completo ou em game over
 if (!jogo_pausado && !jogo_completo && !game_over_ativo) {
     // Atualiza tempo
@@ -77,6 +97,19 @@ function completar_nivel() {
     
     show_debug_message("Nível " + string(nivel_atual) + " completado!");
     show_debug_message("Pontuação: " + string(pontuacao));
+
+    // Salva progresso ao completar o nível
+    var obj_save = asset_get_index("ogamesave");
+    if (obj_save != -1) {
+        var inst_save = instance_find(obj_save, 0);
+        if (!instance_exists(inst_save)) {
+            inst_save = instance_create_layer(0, 0, "Instances", obj_save);
+        }
+        global.save_inst = inst_save;
+        if (instance_exists(inst_save)) {
+            with (inst_save) salvar_dados();
+        }
+    }
 }
 
 /// @function game_over_tempo()
@@ -179,6 +212,19 @@ function reiniciar_nivel() {
     verificar_caminho();
     
     show_debug_message("Nível reiniciado!");
+
+    // Salva progresso atualizado
+    var obj_save = asset_get_index("ogamesave");
+    if (obj_save != -1) {
+        var inst_save = instance_find(obj_save, 0);
+        if (!instance_exists(inst_save)) {
+            inst_save = instance_create_layer(0, 0, "Instances", obj_save);
+        }
+        global.save_inst = inst_save;
+        if (instance_exists(inst_save)) {
+            with (inst_save) salvar_dados();
+        }
+    }
 }
 
 /// @function proximo_nivel()
@@ -211,6 +257,19 @@ function proximo_nivel() {
     verificar_caminho();
     
     show_debug_message("Nível " + string(nivel_atual) + " iniciado!");
+
+    // Salva progresso ao avançar
+    var obj_save = asset_get_index("ogamesave");
+    if (obj_save != -1) {
+        var inst_save = instance_find(obj_save, 0);
+        if (!instance_exists(inst_save)) {
+            inst_save = instance_create_layer(0, 0, "Instances", obj_save);
+        }
+        global.save_inst = inst_save;
+        if (instance_exists(inst_save)) {
+            with (inst_save) salvar_dados();
+        }
+    }
 }
 
 // ============================================

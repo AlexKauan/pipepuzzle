@@ -22,6 +22,25 @@ if (game_over_ativo) {
     draw_set_valign(fa_top);
 }
 
+// Tela de pausa (GUI - acima das peças)
+if (jogo_pausado && !game_over_ativo) {
+    draw_set_color(c_black);
+    draw_set_alpha(0.7);
+    draw_rectangle(0, 0, display_get_gui_width(), display_get_gui_height(), false);
+    draw_set_alpha(1);
+
+    var centro_x_pausa = display_get_gui_width() * 0.5;
+    var centro_y_pausa = display_get_gui_height() * 0.5;
+
+    draw_set_color(c_white);
+    draw_set_font(fnt_game);
+    draw_set_halign(fa_center);
+    draw_set_valign(fa_middle);
+    draw_text(centro_x_pausa, centro_y_pausa, "JOGO PAUSADO\n\nPressione ESC para continuar");
+    draw_set_halign(fa_left);
+    draw_set_valign(fa_top);
+}
+
 // Hint ativo (entre o grid e o painel inferior)
 if (mostrar_hint) {
     var hint_x1 = offset_x - 12;

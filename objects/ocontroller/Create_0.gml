@@ -51,6 +51,17 @@ jogo_completo = false;
 game_over_ativo = false; // <-- ADICIONE ESTA LINHA
 mostrar_hint = false;
 
+// Se houver save solicitado pelo menu, aplica aqui antes de configurar nível
+if (!variable_global_exists("usar_save")) global.usar_save = false;
+if (variable_global_exists("has_save") && global.has_save && global.usar_save) {
+    nivel_atual = global.nivel_salvo;
+    pontuacao = global.pontuacao_salva;
+    hints_disponiveis = global.hints_salvas;
+    show_debug_message("Carregando nível salvo: " + string(nivel_atual));
+}
+// Reseta a flag para evitar reuso involuntário
+global.usar_save = false;
+
 // Configurações por nível
 function configurar_nivel(nivel) {
     switch (nivel) {
@@ -117,6 +128,20 @@ offset_y = round((room_height - (grid_height * cell_size)) / 2) - 50;
 
 // Inicia o timer
 tempo_inicio = current_time;
+
+// Garante que o progresso inicial esteja salvo (para permitir continuar)
+var obj_save_init = asset_get_index("ogamesave");
+var inst_save_init = noone;
+if (obj_save_init != -1) {
+    inst_save_init = instance_find(obj_save_init, 0);
+    if (!instance_exists(inst_save_init)) {
+        inst_save_init = instance_create_layer(0, 0, "Instances", obj_save_init);
+    }
+    global.save_inst = inst_save_init;
+    if (instance_exists(inst_save_init)) {
+        with (inst_save_init) salvar_dados();
+    }
+}
 
 // ============================================
 // FUNÇÕES DE GERAÇÃO DE CAMINHO CORRETO

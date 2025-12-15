@@ -203,31 +203,7 @@ if (hint_timer > 0 && hint_cell_x >= 0 && hint_cell_y >= 0) {
     }
 }
 
-// Pausa
-if (jogo_pausado) {
-    draw_set_alpha(0.7);
-    draw_set_color(c_black);
-    draw_rectangle(0, 0, room_width, room_height, false);
-    draw_set_alpha(1);
-    
-    draw_set_color(c_white);
-    draw_set_halign(fa_center);
-    draw_set_valign(fa_middle);
-    draw_text(room_width/2, room_height/2, "JOGO PAUSADO\n\nPressione ESC para continuar");
-    draw_set_halign(fa_left);
-    draw_set_valign(fa_top);
-}
-
 // Hint ativo (movido para Draw GUI)
-
-// Jogo completo
-if (jogo_completo) {
-    draw_set_color(c_lime);
-    draw_set_halign(fa_center);
-    draw_text(room_width/2, room_height/2 - 50, "🎉 NÍVEL COMPLETO! 🎉");
-    draw_text(room_width/2, room_height/2 - 20, "Pressione N para o próximo nível");
-    draw_set_halign(fa_left);
-}
 
 draw_set_color(c_white);
 
